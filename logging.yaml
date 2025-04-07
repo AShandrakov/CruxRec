@@ -1,0 +1,36 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  standard:
+    format: "[CruxRec] [%(levelname)s]: %(message)s"
+  detailed:
+    format: "%(asctime)s [CruxRec] %(name)s [%(levelname)s] [%(filename)s:%(lineno)d]: %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: app.log
+    mode: w
+    encoding: "utf-8"
+
+loggers:
+  "":
+    level: INFO
+    handlers: [console, file]
+  cli:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false
+  services:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false
