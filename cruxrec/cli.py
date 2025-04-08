@@ -4,7 +4,7 @@ import sys
 
 from config_provider import read_config
 from summarizer import GeminiSummarizer
-from subs_provider import fetch_subtitles
+from subs_provider import SubsProvider
 from utils import setup_logging
 
 
@@ -32,7 +32,9 @@ def main() -> None:
 
     logger = logging.getLogger("cli")
     logger.info("Fetching subtitles...")
-    subtitles_text = fetch_subtitles(args.url, args.lang, args.auto_sub)
+    subs_provider = SubsProvider()
+    subs_provider.remove_subtitles()
+    subtitles_text = subs_provider.fetch_subtitles(args.url, args.lang, args.auto_sub)
 
     if not subtitles_text:
         logger.warning(
