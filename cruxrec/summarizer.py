@@ -13,7 +13,7 @@ class Summarizer(ABC):
 class GeminiSummarizer(Summarizer):
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-    def __init__(self, key: str, prompt: str, timeout: float = 10.0) -> None:
+    def __init__(self, key: str, prompt: str, timeout: float = 100.0) -> None:
         self.key = key
         self.prompt = prompt
         self.timeout = timeout

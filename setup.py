@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="cruxrec",
-    version="0.1.1",
+    version="0.1.2",
     license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",

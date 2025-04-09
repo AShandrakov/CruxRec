@@ -46,6 +46,11 @@ def main() -> None:
     logger.debug("Sending subtitles for summarization...")
 
     key = os.environ["GEMINI_KEY"]
+    if not key:
+        logger.error(
+            "Error: Missing required local variable 'GEMINI_KEY'. Please set it before running the application."
+        )
+        sys.exit(1)
     try:
         summarizer = GeminiSummarizer(key, args.prompt)
         summary = summarizer.summarize(subtitles_text)

@@ -14,7 +14,12 @@ cd cruxrec
 pip install -r requirements.txt
 </pre>
 
+required env variable
+<pre>
+GEMINI_KEY
+</pre>
+
 🚀 Usage
 <pre>
-cruxrec https://www.youtube.com/watch?v=dQw4w9WgXcQ
+cruxrec "your prompt" https://www.youtube.com/...
 </pre>
