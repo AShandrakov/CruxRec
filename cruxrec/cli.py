@@ -1,8 +1,8 @@
 import argparse
 import logging
 import sys
+import os
 
-from config_provider import read_config
 from summarizer import GeminiSummarizer
 from subs_provider import SubsProvider
 from utils import setup_logging
@@ -15,6 +15,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="CruxRec: Extract YouTube subtitles and summarize them using Gemini."
     )
+    parser.add_argument("prompt", help="Prompt ")
     parser.add_argument("url", help="URL of the YouTube video.")
     parser.add_argument(
         "--lang", default="ru", help="Subtitle language code (default: 'ru')."
@@ -24,11 +25,10 @@ def main() -> None:
         action="store_true",
         help="Use auto-generated subtitles if official ones are not available.",
     )
+
     args = parser.parse_args()
 
     setup_logging()
-
-    config = read_config()
 
     logger = logging.getLogger("cli")
     logger.info("Fetching subtitles...")
@@ -45,8 +45,9 @@ def main() -> None:
     logger.info("Preparing subtitles...")
     logger.debug("Sending subtitles for summarization...")
 
+    key = os.environ["GEMINI_KEY"]
     try:
-        summarizer = GeminiSummarizer(config.gemini_key, config.prompt)
+        summarizer = GeminiSummarizer(key, args.prompt)
         summary = summarizer.summarize(subtitles_text)
     except Exception as exp:
         logger.exception("Error occurred during summarization. {exp}")
