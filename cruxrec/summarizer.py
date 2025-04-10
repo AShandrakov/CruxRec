@@ -5,7 +5,7 @@ from requests import RequestException
 
 class Summarizer(ABC):
     @abstractmethod
-    def summarize(self, text: str) -> str:
+    def summarize(self, text: str) -> str | None:
         """Returns a summary (digest) for the given text."""
         pass
 
@@ -19,7 +19,7 @@ class GeminiSummarizer(Summarizer):
         self.timeout = timeout
         self.session = requests.Session()
 
-    def summarize(self, text: str) -> str:
+    def summarize(self, text: str) -> str | None:
         url = f"{self.BASE_URL}?key={self.key}"
         full_prompt = f"{self.prompt}:\n\n{text}"
         data = {"contents": [{"parts": [{"text": full_prompt}]}]}

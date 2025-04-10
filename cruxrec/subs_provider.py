@@ -32,7 +32,7 @@ class SubsProvider:
         url: str,
         lang: str = "ru",
         auto_sub: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         outtmpl = "subs.%(ext)s"
 
         def download_subtitles(write_auto: bool) -> bool:
@@ -146,4 +146,3 @@ class SubsProvider:
             logger.info(f"Removed {deleted_files} subtitle file(s).")
         else:
             logger.debug(f"No subtitle files found to remove with pattern '{pattern}'.")
-
