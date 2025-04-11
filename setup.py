@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="cruxrec",
-    version="0.1.2",
+    version="0.1.3",
     license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -16,6 +16,7 @@ setup(
         "requests",
         "urllib3",
         "yt-dlp",
+        "openai",
     ],
     entry_points={
         "console_scripts": [
