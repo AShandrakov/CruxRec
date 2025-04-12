@@ -5,26 +5,27 @@ from typing import List, Optional
 
 from yt_dlp import YoutubeDL
 
-logger = logging.getLogger("services")
-
 
 class SubsProvider:
+    def __init__(self):
+        self.logger = logging.getLogger("services")
+
     def find_subtitle_file(
         self,
         pattern: str = "subs.*",
         search_dir: Path = Path("."),
     ) -> Optional[Path]:
         resolved_dir = search_dir.resolve()
-        logger.debug(f"Searching for subtitles in directory: {resolved_dir}")
+        self.logger.debug(f"Searching for subtitles in directory: {resolved_dir}")
 
         matched_files = list(resolved_dir.rglob(pattern))
         if not matched_files:
-            logger.debug(f"No files matching pattern '{pattern}' were found.")
+            self.logger.debug(f"No files matching pattern '{pattern}' were found.")
             return None
 
-        logger.debug("Found the following subtitle files:")
+        self.logger.debug("Found the following subtitle files:")
         for file in matched_files:
-            logger.debug(f" - {file}")
+            self.logger.debug(f" - {file}")
         return matched_files[0]
 
     def fetch_subtitles(
@@ -45,13 +46,13 @@ class SubsProvider:
             }
             try:
                 with YoutubeDL(ydl_opts) as ydl:
-                    logger.debug(
+                    self.logger.debug(
                         f"Starting subtitles download (auto={write_auto}), lang='{lang}'"
                     )
                     ydl.download([url])
                 return True
             except Exception as exc:
-                logger.warning("Error downloading subtitles", exc_info=exc)
+                self.logger.warning("Error downloading subtitles", exc_info=exc)
                 return False
 
         download_subtitles(auto_sub)
@@ -60,28 +61,30 @@ class SubsProvider:
         if sub_file:
             file_size = sub_file.stat().st_size
             if file_size == 0:
-                logger.debug(f"Subtitle file '{sub_file}' is empty (size=0). Ignoring.")
+                self.logger.debug(
+                    f"Subtitle file '{sub_file}' is empty (size=0). Ignoring."
+                )
                 sub_file = None
 
         if not sub_file and not auto_sub:
-            logger.debug(
+            self.logger.debug(
                 "Official subtitles not found or empty, trying auto-generated subtitles..."
             )
             if not download_subtitles(True):
-                logger.debug("Fallback download (auto-sub) failed.")
+                self.logger.debug("Fallback download (auto-sub) failed.")
                 return None
             sub_file = self.find_subtitle_file()
             if sub_file and sub_file.stat().st_size == 0:
-                logger.debug("Fallback subtitle file is empty.")
+                self.logger.debug("Fallback subtitle file is empty.")
                 sub_file = None
 
         if not sub_file:
-            logger.debug("Could not locate a valid downloaded subtitle file.")
+            self.logger.debug("Could not locate a valid downloaded subtitle file.")
             return None
 
         subtitles_text = self.parse_subtitle(str(sub_file))
         if not subtitles_text.strip():
-            logger.debug("Parsed subtitles are empty.")
+            self.logger.debug("Parsed subtitles are empty.")
             return None
 
         return subtitles_text
@@ -135,14 +138,16 @@ class SubsProvider:
         for sub_file in resolved_dir.rglob(pattern):
             try:
                 sub_file.unlink()
-                logger.debug(f"Removed subtitle file: {sub_file}")
+                self.logger.debug(f"Removed subtitle file: {sub_file}")
                 deleted_files += 1
             except Exception as exc:
-                logger.warning(
+                self.logger.warning(
                     f"Failed to remove file '{sub_file}': {exc}", exc_info=exc
                 )
 
         if deleted_files:
-            logger.info(f"Removed {deleted_files} subtitle file(s).")
+            self.logger.info(f"Removed {deleted_files} subtitle file(s).")
         else:
-            logger.debug(f"No subtitle files found to remove with pattern '{pattern}'.")
+            self.logger.debug(
+                f"No subtitle files found to remove with pattern '{pattern}'."
+            )

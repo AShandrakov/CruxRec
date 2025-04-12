@@ -8,8 +8,6 @@ from contextlib import asynccontextmanager
 from yt_dlp import YoutubeDL
 from openai import OpenAI
 
-logger = logging.getLogger(__name__)
-
 
 class Transcriber:
     """
@@ -33,6 +31,7 @@ class Transcriber:
         self.whisper_api_key = whisper_api_key
         self.default_language = default_language
         self.cookies_path = cookies_path
+        self.logger = logging.getLogger("serivces")
 
     async def transcribe_from_url(self, url: str, max_duration_s: int = 300) -> str:
         """
@@ -49,13 +48,13 @@ class Transcriber:
         transcription = ""
         try:
             video_file = await self._download_video(url, max_duration_s)
-            logger.info(f"Downloaded video: {video_file}")
+            self.logger.info(f"Downloaded video: {video_file}")
             async with self._extract_audio(video_file) as audio_file:
-                logger.info(f"Extracting audio from: {audio_file}")
+                self.logger.info(f"Extracting audio from: {audio_file}")
                 transcription = await self._transcribe_audio(audio_file)
-                logger.info(f"Transcription: {transcription}")
+                self.logger.info(f"Transcription: {transcription}")
         except Exception as e:
-            logger.exception("Error during transcription:", exc_info=e)
+            self.logger.exception("Error during transcription:", exc_info=e)
         finally:
             if video_file and os.path.exists(video_file):
                 os.remove(video_file)
@@ -73,7 +72,7 @@ class Transcriber:
             "noplaylist": True,
             "quiet": True,
         }
-        logger.info("yt-dlp options: %r", ydl_opts)
+        self.logger.info("yt-dlp options: %r", ydl_opts)
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             if not info_dict:
@@ -154,9 +153,9 @@ class Transcriber:
                 proc = await asyncio.create_subprocess_exec(*conversion_command)
                 await proc.communicate()
                 audio_path = wav_audio_path
-                logger.info(f"Audio converted to WAV: {wav_audio_path}")
+                self.logger.info(f"Audio converted to WAV: {wav_audio_path}")
 
-            logger.info(f"Transcribing {audio_path} via Whisper API...")
+            self.logger.info(f"Transcribing {audio_path} via Whisper API...")
             client = OpenAI(api_key=self.whisper_api_key)
             with open(audio_path, "rb") as audio_file:
                 transcript = client.audio.transcriptions.create(
@@ -164,8 +163,8 @@ class Transcriber:
                 )
                 return transcript.text
         except Exception as e:
-            logger.exception("Error using Whisper API:", exc_info=e)
-            logger.error("Falling back to speech_recognition...")
+            self.logger.exception("Error using Whisper API:", exc_info=e)
+            self.logger.error("Falling back to speech_recognition...")
             return ""
         finally:
             if wav_audio_path and os.path.exists(wav_audio_path):
